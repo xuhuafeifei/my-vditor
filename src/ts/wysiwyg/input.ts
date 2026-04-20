@@ -1,6 +1,6 @@
 import {
     getTopList,
-    hasClosestBlock, hasClosestByAttribute, hasTopClosestByTag,
+    hasClosestBlock, hasClosestByAttribute, hasClosestByMatchTag, hasTopClosestByTag,
 } from "../util/hasClosest";
 import {hasClosestByTag} from "../util/hasClosestByHeadings";
 import {log} from "../util/log";
@@ -12,6 +12,8 @@ import {previoueIsEmptyA} from "./inlineTag";
 
 export const input = (vditor: IVditor, range: Range, event?: InputEvent) => {
     let blockElement = hasClosestBlock(range.startContainer);
+    const tableElement = hasClosestByMatchTag(range.startContainer, "TABLE") as HTMLElement;
+    const tableScrollLeft = tableElement ? tableElement.scrollLeft : 0;
 
     if (!blockElement) {
         // 使用顶级块元素，应使用 innerHTML
@@ -191,6 +193,10 @@ export const input = (vditor: IVditor, range: Range, event?: InputEvent) => {
 
         // 设置光标
         setRangeByWbr(vditor.wysiwyg.element, range);
+        const currentTableElement = hasClosestByMatchTag(range.startContainer, "TABLE") as HTMLElement;
+        if (currentTableElement) {
+            currentTableElement.scrollLeft = tableScrollLeft;
+        }
 
         vditor.wysiwyg.element.querySelectorAll(".vditor-wysiwyg__preview[data-render='2']")
             .forEach((item: HTMLElement) => {

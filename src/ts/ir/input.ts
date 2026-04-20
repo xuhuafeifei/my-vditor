@@ -2,7 +2,7 @@ import {Constants} from "../constants";
 import {isHeadingMD, isHrMD} from "../util/fixBrowserBehavior";
 import {
     getTopList,
-    hasClosestBlock, hasClosestByAttribute,
+    hasClosestBlock, hasClosestByAttribute, hasClosestByMatchTag,
     hasClosestByClassName,
 } from "../util/hasClosest";
 import {hasClosestByTag} from "../util/hasClosestByHeadings";
@@ -15,6 +15,8 @@ import {getMarkdown} from "../markdown/getMarkdown";
 
 export const input = (vditor: IVditor, range: Range, ignoreSpace = false, event?: InputEvent) => {
     let blockElement = hasClosestBlock(range.startContainer);
+    const tableElement = hasClosestByMatchTag(range.startContainer, "TABLE") as HTMLElement;
+    const tableScrollLeft = tableElement ? tableElement.scrollLeft : 0;
     // 前后可以输入空格
     if (blockElement && !ignoreSpace && blockElement.getAttribute("data-type") !== "code-block") {
         if ((isHrMD(blockElement.innerHTML) && blockElement.previousElementSibling) ||
@@ -231,6 +233,10 @@ export const input = (vditor: IVditor, range: Range, ignoreSpace = false, event?
     }
 
     setRangeByWbr(vditor.ir.element, range);
+    const currentTableElement = hasClosestByMatchTag(range.startContainer, "TABLE") as HTMLElement;
+    if (currentTableElement) {
+        currentTableElement.scrollLeft = tableScrollLeft;
+    }
 
     vditor.ir.element.querySelectorAll(".vditor-ir__preview[data-render='2']").forEach((item: HTMLElement) => {
         processCodeRender(item, vditor);
