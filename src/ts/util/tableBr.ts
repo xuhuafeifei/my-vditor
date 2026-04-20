@@ -7,7 +7,7 @@
 // Lute 作为普通文本原样透传；Lute 处理完后，再把占位符恢复为真正的 <br />
 // （写进 Markdown 源码）或 <br> DOM 节点（用于 WYSIWYG 显示）。
 
-export const TABLE_BR_PLACEHOLDER = "__VDITOR_TABLE_BR__";
+export const TABLE_BR_PLACEHOLDER = "VDITOR-TABLE-BR-PLACEHOLDER-9C3F7D";
 
 // 把 HTML 字符串中表格 cell 里的 <br> 替换为占位符文本，再返回新的 HTML。
 export const encodeTableCellBrInHTML = (html: string): string => {
