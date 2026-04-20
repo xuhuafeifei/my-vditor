@@ -39,7 +39,12 @@ export const processPasteCode = (html: string, text: string, type = "sv") => {
 
     if (isCode) {
         const code = text || html;
-        if (/\n/.test(code) || pres.length === 1) {
+        const hasNewline = /\r?\n/.test(code);
+        // IDE 复制单行通常也会包一层 <pre>，但这类内容不应强制转为代码块
+        if (pres.length === 1 && !hasNewline) {
+            return false;
+        }
+        if (hasNewline || pres.length === 1) {
             if (type === "wysiwyg") {
                 return `<div class="vditor-wysiwyg__block" data-block="0" data-type="code-block"><pre><code>${
                     code.replace(/&/g, "&amp;").replace(/</g, "&lt;")}<wbr></code></pre></div>`;

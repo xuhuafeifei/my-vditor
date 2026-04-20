@@ -5,6 +5,7 @@ import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {hasClosestByTag} from "../util/hasClosestByHeadings";
 import {log} from "../util/log";
 import {getEditorRange, setRangeByWbr} from "../util/selection";
+import {decodeTableCellBrInSVHTML, encodeTableCellBrInMarkdown} from "../util/tableBr";
 import {inputEvent} from "./inputEvent";
 import {combineFootnote} from "./combineFootnote";
 
@@ -18,10 +19,11 @@ export const processPaste = (vditor: IVditor, text: string) => {
     if (!blockElement) {
         blockElement = vditor.sv.element;
     }
-    let spinHTML = vditor.lute.SpinVditorSVDOM(blockElement.textContent)
+    let spinHTML = vditor.lute.SpinVditorSVDOM(encodeTableCellBrInMarkdown(blockElement.textContent))
     spinHTML = "<div data-block='0'>" +
         spinHTML.replace(/<span data-type="newline"><br \/><span style="display: none">\n<\/span><\/span><span data-type="newline"><br \/><span style="display: none">\n<\/span><\/span></g, '<span data-type="newline"><br /><span style="display: none">\n</span></span><span data-type="newline"><br /><span style="display: none">\n</span></span></div><div data-block="0"><') +
         "</div>";
+    spinHTML = decodeTableCellBrInSVHTML(spinHTML);
     if (blockElement.isEqualNode(vditor.sv.element)) {
         blockElement.innerHTML = spinHTML;
     } else {
@@ -53,10 +55,11 @@ export const getSideByType = (spanNode: Node, type: string, isPrevious = true) =
 
 export const processSpinVditorSVDOM = (html: string, vditor: IVditor) => {
     log("SpinVditorSVDOM", html, "argument", vditor.options.debugger);
-    const spinHTML = vditor.lute.SpinVditorSVDOM(html)
+    const spinHTML = vditor.lute.SpinVditorSVDOM(encodeTableCellBrInMarkdown(html))
     html = "<div data-block='0'>" +
         spinHTML.replace(/<span data-type="newline"><br \/><span style="display: none">\n<\/span><\/span><span data-type="newline"><br \/><span style="display: none">\n<\/span><\/span></g, '<span data-type="newline"><br /><span style="display: none">\n</span></span><span data-type="newline"><br /><span style="display: none">\n</span></span></div><div data-block="0"><') +
         "</div>";
+    html = decodeTableCellBrInSVHTML(html);
     log("SpinVditorSVDOM", html, "result", vditor.options.debugger);
     return html;
 };

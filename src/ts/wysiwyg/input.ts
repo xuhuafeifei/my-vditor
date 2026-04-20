@@ -7,6 +7,7 @@ import {log} from "../util/log";
 import {processCodeRender} from "../util/processCode";
 import {setRangeByWbr} from "../util/selection";
 import {renderToc} from "../util/toc";
+import {decodeTableCellBrInHTML, encodeTableCellBrInHTML} from "../util/tableBr";
 import {afterRenderEvent} from "./afterRenderEvent";
 import {previoueIsEmptyA} from "./inlineTag";
 
@@ -140,9 +141,11 @@ export const input = (vditor: IVditor, range: Range, event?: InputEvent) => {
             html = '<p data-block="0">```<wbr></p>'.replace("```", "```" + vditor.hint.recentLanguage);
         }
 
+        html = encodeTableCellBrInHTML(html);
         log("SpinVditorDOM", html, "argument", vditor.options.debugger);
         html = vditor.lute.SpinVditorDOM(html);
         log("SpinVditorDOM", html, "result", vditor.options.debugger);
+        html = decodeTableCellBrInHTML(html);
 
         if (isWYSIWYGElement) {
             blockElement.innerHTML = html;

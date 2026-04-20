@@ -1375,6 +1375,20 @@ export const paste = async (vditor: IVditor, event: (ClipboardEvent | DragEvent)
     // process code
     const height = vditor[vditor.currentMode].element.scrollHeight;
     const code = processPasteCode(textHTML, textPlain, vditor.currentMode);
+    const shouldPreferPlainTextPaste = (() => {
+        if (!textHTML || !textPlain) {
+            return false;
+        }
+        const tempElement = document.createElement("div");
+        tempElement.innerHTML = textHTML;
+        const pres = tempElement.querySelectorAll("pre");
+        if (pres.length !== 1) {
+            return false;
+        }
+        const plain = textPlain.replace(/\u0000/g, "").trim();
+        const htmlText = (tempElement.textContent || "").replace(/\u0000/g, "").trim();
+        return plain !== "" && !/\r?\n/.test(plain) && plain === htmlText;
+    })();
     const codeElement = vditor.currentMode === "sv" ?
         hasClosestByAttribute(event.target, "data-type", "code-block") :
         hasClosestByMatchTag(event.target, "CODE");
@@ -1401,7 +1415,7 @@ export const paste = async (vditor: IVditor, event: (ClipboardEvent | DragEvent)
     } else if (code) {
         callback.pasteCode(code);
     } else {
-        if (textHTML.trim() !== "") {
+        if (textHTML.trim() !== "" && !shouldPreferPlainTextPaste) {
             const tempElement = document.createElement("div");
             tempElement.innerHTML = textHTML;
             if (!vditor.options.upload.base64ToLink) {
