@@ -424,15 +424,22 @@ class WYSIWYG {
                 return;
             }
 
-            if (event.target.tagName === "IMG" &&
-                // plantuml 图片渲染不进行提示
-                !event.target.parentElement.classList.contains("vditor-wysiwyg__preview")) {
-                if (event.target.getAttribute("data-type") === "link-ref") {
-                    genLinkRefPopover(vditor, event.target);
-                } else {
-                    genImagePopover(event, vditor);
+            if (event.target.tagName === "IMG") {
+                const previewElement = hasClosestByClassName(event.target, "vditor-wysiwyg__preview");
+                if (previewElement) {
+                    // 图片属于预览块时，优先展开源码编辑区
+                    showCode(previewElement, vditor);
+                    return;
                 }
-                return;
+                // plantuml 图片渲染不进行提示
+                if (!event.target.parentElement.classList.contains("vditor-wysiwyg__preview")) {
+                    if (event.target.getAttribute("data-type") === "link-ref") {
+                        genLinkRefPopover(vditor, event.target);
+                    } else {
+                        genImagePopover(event, vditor);
+                    }
+                    return;
+                }
             }
 
             // 打开链接

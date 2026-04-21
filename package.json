@@ -68,7 +68,8 @@
         "test:watch": "jest --watch",
         "test": "jest --coverage",
         "start": "webpack serve --config webpack.start.js",
-        "build": "webpack"
+        "build": "webpack",
+    	"sync:vditor": "bash scripts/sync-build.sh ../markdown-docs --from dist --to vendor/vditor"
     },
     "keywords": [
         "editor",
