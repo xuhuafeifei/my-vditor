@@ -61,7 +61,7 @@ const applyInlineStyles = (
     scroller.style.justifyContent = "center";
     scroller.style.padding = "48px 12px 56px";
     scroller.style.boxSizing = "border-box";
-    scroller.style.overflow = "auto";
+    scroller.style.overflow = "hidden";
     scroller.style.cursor = "default";
 
     zoomBox.style.display = "inline-block";
@@ -148,10 +148,29 @@ export const previewImage = (oldImgElement: HTMLImageElement, _lang: keyof II18n
     const MAX = 6;
     const STEP = 1.2;
     let scale = 1;
-    const setScale = (next: number) => {
-        scale = Math.min(MAX, Math.max(MIN, next));
-        zoomBox.style.transform = `scale(${scale})`;
+    let translateX = 0;
+    let translateY = 0;
+    const updateTransform = () => {
+        zoomBox.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
         pctEl.textContent = `${Math.round(scale * 100)}%`;
+        scroller.style.cursor = scale > 1 ? "grab" : "default";
+    };
+    const setScale = (next: number, anchorClientX?: number, anchorClientY?: number) => {
+        const prevScale = scale;
+        scale = Math.min(MAX, Math.max(MIN, next));
+        if (anchorClientX !== undefined && anchorClientY !== undefined && prevScale > 0 && scale !== prevScale) {
+            const rect = scroller.getBoundingClientRect();
+            const dx = anchorClientX - rect.left - rect.width / 2;
+            const dy = anchorClientY - rect.top - rect.height / 2;
+            const ratio = scale / prevScale;
+            translateX = ratio * translateX + (1 - ratio) * dx;
+            translateY = ratio * translateY + (1 - ratio) * dy;
+        }
+        if (scale <= 1) {
+            translateX = 0;
+            translateY = 0;
+        }
+        updateTransform();
     };
     setScale(1);
 
@@ -178,11 +197,53 @@ export const previewImage = (oldImgElement: HTMLImageElement, _lang: keyof II18n
         }
     };
     const onResize = () => onImgLayout();
+    const onWheel = (e: WheelEvent) => {
+        // Prevent browser/page zoom or scroll while operating inside image modal.
+        e.preventDefault();
+        e.stopPropagation();
+        const ratio = e.deltaY < 0 ? STEP : 1 / STEP;
+        setScale(scale * ratio, e.clientX, e.clientY);
+    };
+    let dragging = false;
+    let moved = false;
+    let startX = 0;
+    let startY = 0;
+    const onPointerMove = (e: PointerEvent) => {
+        if (!dragging) {
+            return;
+        }
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (!moved && (Math.abs(dx) > 2 || Math.abs(dy) > 2)) {
+            moved = true;
+        }
+        translateX += dx;
+        translateY += dy;
+        startX = e.clientX;
+        startY = e.clientY;
+        scroller.style.cursor = "grabbing";
+        updateTransform();
+    };
+    const onPointerUp = () => {
+        if (!dragging) {
+            return;
+        }
+        dragging = false;
+        scroller.style.cursor = scale > 1 ? "grab" : "default";
+        if (moved) {
+            // Suppress one click so drag release won't close modal.
+            scroller.setAttribute("data-vditor-img-dragged", "1");
+            window.setTimeout(() => scroller.removeAttribute("data-vditor-img-dragged"), 0);
+        }
+    };
 
     const close = () => {
         // Clean up all side effects introduced by the overlay.
         document.removeEventListener("keydown", onKey);
         window.removeEventListener("resize", onResize);
+        scroller.removeEventListener("wheel", onWheel);
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerup", onPointerUp);
         document.body.style.overflow = "";
         if (wrap.parentNode) {
             wrap.remove();
@@ -195,13 +256,32 @@ export const previewImage = (oldImgElement: HTMLImageElement, _lang: keyof II18n
     });
     zoomInBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        setScale(scale * STEP);
+        const rect = scroller.getBoundingClientRect();
+        setScale(scale * STEP, rect.left + rect.width / 2, rect.top + rect.height / 2);
     });
     zoomOutBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        setScale(scale / STEP);
+        const rect = scroller.getBoundingClientRect();
+        setScale(scale / STEP, rect.left + rect.width / 2, rect.top + rect.height / 2);
     });
+    scroller.addEventListener("wheel", onWheel, {passive: false});
+    scroller.addEventListener("pointerdown", (e) => {
+        if (e.button !== 0 || scale <= 1) {
+            return;
+        }
+        e.preventDefault();
+        dragging = true;
+        moved = false;
+        startX = e.clientX;
+        startY = e.clientY;
+        scroller.style.cursor = "grabbing";
+    });
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", onPointerUp);
     scroller.addEventListener("click", (e) => {
+        if (scroller.getAttribute("data-vditor-img-dragged") === "1") {
+            return;
+        }
         if (e.target === scroller) {
             close();
         }

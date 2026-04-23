@@ -1,6 +1,67 @@
 import {previewImage} from "../preview/image";
 import {isVditorEmptyImagePlaceholderSrc} from "../util/emptyImagePlaceholder";
 
+const VDITOR_IMAGE_LOAD_FAILED_SVG = [
+    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 1024 1024\">",
+    "<rect width=\"1024\" height=\"1024\" rx=\"120\" fill=\"#f5f5f5\"/>",
+    "<path d=\"M544 224a64 64 0 1 1 0 128 64 64 0 0 1 0-128zm-320 96h128v128H224V320zm448 256h128v128H672V576z\" fill=\"#c4c4c4\"/>",
+    "<path d=\"M192 736l200-224 136 152 88-96 216 168H192z\" fill=\"#bdbdbd\"/>",
+    "<path d=\"M272 224h480a80 80 0 0 1 80 80v416a80 80 0 0 1-80 80H272a80 80 0 0 1-80-80V304a80 80 0 0 1 80-80zm0 64a16 16 0 0 0-16 16v416a16 16 0 0 0 16 16h480a16 16 0 0 0 16-16V304a16 16 0 0 0-16-16H272z\" fill=\"#8e8e8e\"/>",
+    "<path d=\"M320 320l384 384\" stroke=\"#9a9a9a\" stroke-width=\"64\" stroke-linecap=\"round\"/>",
+    "</svg>",
+].join("");
+const VDITOR_IMAGE_LOAD_FAILED_SRC = "data:image/svg+xml," + encodeURIComponent(VDITOR_IMAGE_LOAD_FAILED_SVG);
+
+const bindImageLoadState = (img: HTMLImageElement) => {
+    if (img.getAttribute("data-vditor-image-state-bound") === "1") {
+        return;
+    }
+    const initialSrc = (img.getAttribute("src") || "").trim();
+    if (!initialSrc || isVditorEmptyImagePlaceholderSrc(initialSrc) || initialSrc === VDITOR_IMAGE_LOAD_FAILED_SRC) {
+        return;
+    }
+    img.setAttribute("data-vditor-image-state-bound", "1");
+    img.setAttribute("data-vditor-image-original-src", initialSrc);
+    const markLoaded = () => {
+        img.setAttribute("data-vditor-image-load-state", "loaded");
+        img.classList.remove("vditor-img--load-failed");
+    };
+    const markFailed = () => {
+        img.setAttribute("data-vditor-image-load-state", "failed");
+        img.classList.add("vditor-img--load-failed");
+        img.setAttribute("src", VDITOR_IMAGE_LOAD_FAILED_SRC);
+    };
+    img.addEventListener("load", () => {
+        if (img.getAttribute("src") === VDITOR_IMAGE_LOAD_FAILED_SRC) {
+            return;
+        }
+        markLoaded();
+    });
+    img.addEventListener("error", () => {
+        if (img.getAttribute("src") === VDITOR_IMAGE_LOAD_FAILED_SRC) {
+            return;
+        }
+        markFailed();
+    });
+    img.addEventListener("click", (event) => {
+        if (img.getAttribute("data-vditor-image-load-state") !== "failed") {
+            return;
+        }
+        const src = (img.getAttribute("data-vditor-image-original-src") || "").trim();
+        if (!src) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        img.classList.remove("vditor-img--load-failed");
+        img.setAttribute("data-vditor-image-load-state", "retrying");
+        img.setAttribute("src", src);
+    });
+    if (img.complete && img.naturalWidth === 0) {
+        markFailed();
+    }
+};
+
 /** 右上角「预览」按钮（VditorI18n.imageBlockPreview，或各语言包） */
 const getImageBlockPreviewButtonTitle = (): string => {
     const I = typeof window !== "undefined" && (window as Window & {VditorI18n?: {imageBlockPreview?: string}}).VditorI18n;
@@ -136,6 +197,7 @@ export const wrapStandaloneImageBlocksAfterSpin = (html: string, vditor: IVditor
         const pr = document.createElement("div");
         pr.className = "vditor-wysiwyg__preview vditor-wysiwyg__image-md__preview";
         pr.setAttribute("data-render", "1");
+        bindImageLoadState(imgEl);
         pr.appendChild(imgEl);
         wrap.appendChild(pre);
         wrap.appendChild(pr);
@@ -201,6 +263,8 @@ export const syncImageMdBlockFromCode = (block: HTMLElement, vditor: IVditor) =>
     }
     const md = code.textContent?.trim() || "";
     if (!md) {
+        preview.innerHTML = "";
+        pre.style.display = "block";
         return;
     }
     try {
@@ -210,10 +274,14 @@ export const syncImageMdBlockFromCode = (block: HTMLElement, vditor: IVditor) =>
         const newImg = t.querySelector("img") as HTMLImageElement | null;
         if (newImg) {
             preview.innerHTML = "";
+            bindImageLoadState(newImg);
             preview.appendChild(newImg);
             code.textContent = buildMarkdownImageFromImgElement(
                 preview.querySelector("img") as HTMLImageElement);
             pre.style.display = "none";
+        } else {
+            preview.innerHTML = "";
+            pre.style.display = "block";
         }
     } catch (e) {
         /* 非法语法：保持 pre 可见 */
