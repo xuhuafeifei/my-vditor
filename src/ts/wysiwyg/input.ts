@@ -7,8 +7,13 @@ import {log} from "../util/log";
 import {processCodeRender} from "../util/processCode";
 import {setRangeByWbr} from "../util/selection";
 import {renderToc} from "../util/toc";
+import {
+    injectEmptyMarkdownImagesAsHtml,
+    patchEmptyImageSrcInHtml,
+} from "../util/emptyImagePlaceholder";
 import {decodeTableCellBrInHTML, encodeTableCellBrInHTML} from "../util/tableBr";
 import {afterRenderEvent} from "./afterRenderEvent";
+import {unwrapImageMdBlocksForSpin, wrapStandaloneImageBlocksAfterSpin} from "./imageMdBlock";
 import {previoueIsEmptyA} from "./inlineTag";
 
 export const input = (vditor: IVditor, range: Range, event?: InputEvent) => {
@@ -142,10 +147,14 @@ export const input = (vditor: IVditor, range: Range, event?: InputEvent) => {
         }
 
         html = encodeTableCellBrInHTML(html);
+        html = injectEmptyMarkdownImagesAsHtml(html);
+        html = unwrapImageMdBlocksForSpin(html, vditor);
         log("SpinVditorDOM", html, "argument", vditor.options.debugger);
         html = vditor.lute.SpinVditorDOM(html);
         log("SpinVditorDOM", html, "result", vditor.options.debugger);
         html = decodeTableCellBrInHTML(html);
+        html = patchEmptyImageSrcInHtml(html);
+        html = wrapStandaloneImageBlocksAfterSpin(html, vditor);
 
         if (isWYSIWYGElement) {
             blockElement.innerHTML = html;

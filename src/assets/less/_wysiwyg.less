@@ -133,6 +133,68 @@
     content: "$$";
   }
 
+  div.vditor-wysiwyg__block[data-type="image-md-block"]:before {
+    content: "IMG";
+  }
+
+  div.vditor-wysiwyg__block[data-type="image-md-block"] {
+    position: relative;
+
+    pre.vditor-wysiwyg__image-md__src:first-child {
+      margin-bottom: 0.35em;
+    }
+
+    pre.vditor-wysiwyg__image-md__src {
+      box-sizing: border-box;
+      max-width: 100%;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    code.vditor-wysiwyg__image-md__code {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 1.2em;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .vditor-wysiwyg__image-md__open {
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      right: 0;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 2px;
+      background-color: var(--panel-background-color);
+      color: var(--textarea-text-color);
+      box-shadow: 0 0 0 1px var(--border-color);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .vditor-wysiwyg__image-md__open:hover,
+    .vditor-wysiwyg__image-md__open:focus {
+      background-color: var(--count-background-color);
+    }
+
+    .vditor-wysiwyg__image-md__open-svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
   .vditor-toc:before {
     content: "ToC";
   }

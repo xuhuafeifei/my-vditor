@@ -37,6 +37,8 @@ window.VditorI18n = {
   'heading5': '五级标题',
   'heading6': '六级标题',
   'help': '帮助',
+  'imageBlockEditHint': '单击图片可编辑 Markdown；右上角按钮可预览大图；亦可双击图片预览',
+  'imageBlockPreview': '预览大图',
   'imageURL': '图片地址',
   'indent': '列表缩进',
   'info': '关于',

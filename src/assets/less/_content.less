@@ -234,46 +234,110 @@
     flex-direction: column;
     z-index: 100;
 
-    &__bar {
-      border-bottom: 1px solid var(--border-color);
-      background-color: var(--toolbar-background-color);
-      text-align: center;
-      height: 36px;
-      box-sizing: border-box;
+    &__close {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      padding: 6px 12px;
+      border: 0;
+      border-radius: 3px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.7);
+      }
+
+      &-x {
+        font-size: 20px;
+        line-height: 1;
+        margin-right: 4px;
+      }
+
+      &-txt {
+        @media (max-width: 420px) {
+          display: none;
+        }
+      }
+    }
+
+    &__stage {
+      flex: 1;
+      min-height: 0;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 48px 12px 56px;
+      box-sizing: border-box;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.45);
+      cursor: default;
+    }
+
+    &__inner {
+      display: inline-block;
+      line-height: 0;
+      transition: transform 0.12s ease-out;
+    }
+
+    &__zoom {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 12px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      user-select: none;
+      pointer-events: auto;
     }
 
     &__btn {
-      display: flex;
+      display: inline-flex;
       align-items: center;
+      justify-content: center;
+      min-width: 40px;
+      height: 40px;
+      margin: 0;
+      border: 0;
+      border-radius: 4px;
+      background-color: rgba(0, 0, 0, 0.55);
+      color: #fff;
+      font-size: 22px;
+      line-height: 1;
       cursor: pointer;
-      margin-left: 24px;
-      user-select: none;
-      color: var(--toolbar-icon-color);
+      -webkit-tap-highlight-color: transparent;
 
       &:hover {
-        color: var(--toolbar-icon-hover-color);
-      }
-
-      svg {
-        height: 14px;
-        width: 14px;
-        margin-right: 8px;
-        fill: currentColor;
+        background-color: rgba(0, 0, 0, 0.75);
       }
     }
 
-    &__img {
-      flex: 1;
-      background-color: var(--textarea-background-color);
-      overflow: auto;
-      cursor: zoom-out;
-
-      img {
-        max-width: none;
-      }
+    &__zoom-pct {
+      min-width: 3.2em;
+      text-align: center;
+      font-size: 12px;
+      color: #fff;
+      text-shadow: 0 0 2px #000;
     }
+  }
+
+  /** 大图预览层（全屏、暗色遮罩、仅关闭+缩放） */
+  &-img--layer {
+    border: 0;
+    border-radius: 0;
+    background-color: transparent;
   }
 }

@@ -1027,6 +1027,7 @@ export const genAPopover = (vditor: IVditor, aElement: HTMLElement, range: Range
     const input1 = document.createElement("input");
     input1Wrap.appendChild(input1);
     input1.className = "vditor-input";
+    input1.setAttribute("data-vditor-redirect-paste", "1");
     input1.setAttribute("placeholder", window.VditorI18n.link);
     input1.value = aElement.getAttribute("href") || "";
     input1.oninput = () => {
@@ -1071,72 +1072,6 @@ export const genAPopover = (vditor: IVditor, aElement: HTMLElement, range: Range
     customWysiwygToolbar(vditor, "a")
     setPopoverPosition(vditor, aElement);
 };
-
-export const genImagePopover = (event: Event, vditor: IVditor) => {
-    const imgElement = event.target as HTMLImageElement;
-    vditor.wysiwyg.popover.innerHTML = "";
-    const updateImg = () => {
-        imgElement.setAttribute("src", inputElement.value);
-        imgElement.setAttribute("alt", alt.value);
-        imgElement.setAttribute("title", title.value);
-        if (typeof vditor.options.input === "function") {
-            vditor.options.input(getMarkdown(vditor));
-        }
-    };
-
-    const inputWrap = document.createElement("span");
-    inputWrap.setAttribute("aria-label", window.VditorI18n.imageURL);
-    inputWrap.className = "vditor-tooltipped vditor-tooltipped__n";
-    const inputElement = document.createElement("input");
-    inputWrap.appendChild(inputElement);
-    inputElement.className = "vditor-input";
-    inputElement.setAttribute("placeholder", window.VditorI18n.imageURL);
-    inputElement.value = imgElement.getAttribute("src") || "";
-    inputElement.oninput = () => {
-        updateImg();
-    };
-    inputElement.onkeydown = (elementEvent) => {
-        removeBlockElement(vditor, elementEvent);
-    };
-
-    const altWrap = document.createElement("span");
-    altWrap.setAttribute("aria-label", window.VditorI18n.alternateText);
-    altWrap.className = "vditor-tooltipped vditor-tooltipped__n";
-    const alt = document.createElement("input");
-    altWrap.appendChild(alt);
-    alt.className = "vditor-input";
-    alt.setAttribute("placeholder", window.VditorI18n.alternateText);
-    alt.style.width = "52px";
-    alt.value = imgElement.getAttribute("alt") || "";
-    alt.oninput = () => {
-        updateImg();
-    };
-    alt.onkeydown = (elementEvent) => {
-        removeBlockElement(vditor, elementEvent);
-    };
-
-    const titleWrap = document.createElement("span");
-    titleWrap.setAttribute("aria-label", window.VditorI18n.title);
-    titleWrap.className = "vditor-tooltipped vditor-tooltipped__n";
-    const title = document.createElement("input");
-    titleWrap.appendChild(title);
-    title.className = "vditor-input";
-    title.setAttribute("placeholder", window.VditorI18n.title);
-    title.value = imgElement.getAttribute("title") || "";
-    title.oninput = () => {
-        updateImg();
-    };
-    title.onkeydown = (elementEvent) => {
-        removeBlockElement(vditor, elementEvent);
-    };
-    genClose(imgElement, vditor);
-    vditor.wysiwyg.popover.insertAdjacentElement("beforeend", inputWrap);
-    vditor.wysiwyg.popover.insertAdjacentElement("beforeend", altWrap);
-    vditor.wysiwyg.popover.insertAdjacentElement("beforeend", titleWrap);
-    customWysiwygToolbar(vditor, "image")
-    setPopoverPosition(vditor, imgElement);
-};
-
 
 const focusToElement = (event: KeyboardEvent, range: Range) => {
     if ((!isCtrl(event) && !event.shiftKey && event.key === "Enter") || event.key === "Escape") {

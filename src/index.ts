@@ -35,6 +35,7 @@ import {afterRenderEvent} from "./ts/wysiwyg/afterRenderEvent";
 import {WYSIWYG} from "./ts/wysiwyg/index";
 import {input} from "./ts/wysiwyg/input";
 import {renderDomByMd} from "./ts/wysiwyg/renderDomByMd";
+import {expandEmptyImageInMarkdown, patchEmptyImageInElement} from "./ts/util/emptyImagePlaceholder";
 import {execAfterRender, insertEmptyBlock} from "./ts/util/fixBrowserBehavior";
 import {accessLocalStorage} from "./ts/util/compatibility";
 
@@ -300,12 +301,15 @@ class Vditor extends VditorMethod {
     /** 在焦点处插入 Markdown */
     public insertMD(md: string) {
         // https://github.com/Vanessa219/vditor/issues/1640
+        const mdx = expandEmptyImageInMarkdown(md);
         if (this.vditor.currentMode === "ir") {
-            insertHTML(this.vditor.lute.Md2VditorIRDOM(md), this.vditor);
+            insertHTML(this.vditor.lute.Md2VditorIRDOM(mdx), this.vditor);
+            patchEmptyImageInElement(this.vditor.ir.element);
         } else if (this.vditor.currentMode === "wysiwyg") {
-            insertHTML(this.vditor.lute.Md2VditorDOM(md), this.vditor);
+            insertHTML(this.vditor.lute.Md2VditorDOM(mdx), this.vditor);
+            patchEmptyImageInElement(this.vditor.wysiwyg.element);
         } else {
-            processPaste(this.vditor, md);
+            processPaste(this.vditor, mdx);
         }
         this.vditor.outline.render(this.vditor);
         execAfterRender(this.vditor);
@@ -327,7 +331,9 @@ class Vditor extends VditorMethod {
                 enableInput: false,
             });
         } else {
-            this.vditor.ir.element.innerHTML = this.vditor.lute.Md2VditorIRDOM(markdown);
+            this.vditor.ir.element.innerHTML = this.vditor.lute.Md2VditorIRDOM(
+                expandEmptyImageInMarkdown(markdown));
+            patchEmptyImageInElement(this.vditor.ir.element);
             this.vditor.ir.element
                 .querySelectorAll(".vditor-ir__preview[data-render='2']")
                 .forEach((item: HTMLElement) => {

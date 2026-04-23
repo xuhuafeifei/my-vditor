@@ -24,11 +24,14 @@ import {
 } from "../util/selection"
 import {clickToc, renderToc} from "../util/toc";
 import {afterRenderEvent} from "./afterRenderEvent";
-import {genImagePopover, genLinkRefPopover, highlightToolbarWYSIWYG} from "./highlightToolbarWYSIWYG";
+import {genLinkRefPopover, highlightToolbarWYSIWYG} from "./highlightToolbarWYSIWYG";
+import {syncImageMdBlockFromCode, unwrapImageMdBlocksForSpin, wrapStandaloneImageBlocksAfterSpin} from "./imageMdBlock";
+import {patchEmptyImageSrcInHtml} from "../util/emptyImagePlaceholder";
 import {getRenderElementNextNode, modifyPre} from "./inlineTag";
 import {input} from "./input";
 import {showCode} from "./showCode";
 import {getMarkdown} from "../markdown/getMarkdown";
+import {previewImage} from "../preview/image";
 
 class WYSIWYG {
     public range: Range;
@@ -60,6 +63,14 @@ class WYSIWYG {
         this.selectPopover = divElement.lastElementChild as HTMLDivElement;
 
         this.bindEvent(vditor);
+
+        /* contenteditable 内嵌按钮：阻止默认行为，避免选区/焦点抢掉导致 click 不触发预览 */
+        this.element.addEventListener("mousedown", (e: MouseEvent) => {
+            const from = e.target instanceof Element ? e.target : (e.target as Node).parentElement;
+            if (from && from.closest?.("[data-vditor-wysiwyg-image-md-open]")) {
+                e.preventDefault();
+            }
+        }, true);
 
         focusEvent(vditor, this.element);
         dblclickEvent(vditor, this.element);
@@ -293,7 +304,45 @@ class WYSIWYG {
             this.selectPopover.style.top = topPx;
         });
 
+        this.element.addEventListener("focusout", (e: FocusEvent) => {
+            const t = e.target as Node;
+            if (t.nodeType === 1) {
+                const el = t as HTMLElement;
+                if (el.classList.contains("vditor-wysiwyg__image-md__code")) {
+                    const block = el.closest?.('[data-type="image-md-block"]') as HTMLElement | null;
+                    if (!block) {
+                        return;
+                    }
+                    const rt = e.relatedTarget as Node | null;
+                    if (rt && block.contains(rt)) {
+                        return;
+                    }
+                    syncImageMdBlockFromCode(block, vditor);
+                }
+            }
+        }, true);
+
         this.element.addEventListener("paste", (event: ClipboardEvent & { target: HTMLElement }) => {
+            // 浮层打开时焦点常仍在 contenteditable 上，Cmd/Ctrl+V 会进正文；将纯文本改写入浮层内「主」输入框（超链 href，图片为 Typora 式源码编辑）
+            if (this.popover.style.display === "block") {
+                const redirect = this.popover.querySelector<HTMLInputElement>("[data-vditor-redirect-paste]");
+                const trg = event.target;
+                if (redirect && trg && this.element.contains(trg as Node) && !this.popover.contains(trg as Node)) {
+                    const text = event.clipboardData?.getData("text/plain") ?? "";
+                    if (text) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        redirect.focus();
+                        const s = typeof redirect.selectionStart === "number" ? redirect.selectionStart : redirect.value.length;
+                        const e = typeof redirect.selectionEnd === "number" ? redirect.selectionEnd : s;
+                        redirect.value = redirect.value.substring(0, s) + text + redirect.value.substring(e);
+                        const pos = s + text.length;
+                        redirect.setSelectionRange(pos, pos);
+                        redirect.dispatchEvent(new Event("input", {bubbles: true}));
+                        return;
+                    }
+                }
+            }
             paste(vditor, event, {
                 pasteCode: (code: string) => {
                     const range = getEditorRange(vditor);
@@ -302,9 +351,19 @@ class WYSIWYG {
                     range.insertNode(node.content.cloneNode(true));
                     const blockElement = hasClosestByAttribute(range.startContainer, "data-block", "0");
                     if (blockElement) {
-                        blockElement.outerHTML = vditor.lute.SpinVditorDOM(blockElement.outerHTML);
+                        let h = blockElement.outerHTML;
+                        h = unwrapImageMdBlocksForSpin(h, vditor);
+                        h = vditor.lute.SpinVditorDOM(h);
+                        h = patchEmptyImageSrcInHtml(h);
+                        h = wrapStandaloneImageBlocksAfterSpin(h, vditor);
+                        blockElement.outerHTML = h;
                     } else {
-                        vditor.wysiwyg.element.innerHTML = vditor.lute.SpinVditorDOM(vditor.wysiwyg.element.innerHTML);
+                        let h = vditor.wysiwyg.element.innerHTML;
+                        h = unwrapImageMdBlocksForSpin(h, vditor);
+                        h = vditor.lute.SpinVditorDOM(h);
+                        h = patchEmptyImageSrcInHtml(h);
+                        h = wrapStandaloneImageBlocksAfterSpin(h, vditor);
+                        vditor.wysiwyg.element.innerHTML = h;
                     }
                     setRangeByWbr(vditor.wysiwyg.element, range);
                 },
@@ -409,6 +468,21 @@ class WYSIWYG {
         });
 
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
+            const tEl = event.target instanceof Element ? event.target : (event.target as Node).parentElement;
+            const openMdPreview = tEl && tEl.closest?.("[data-vditor-wysiwyg-image-md-open]");
+            if (openMdPreview) {
+                event.preventDefault();
+                event.stopPropagation();
+                const block = (openMdPreview as HTMLElement).closest?.('[data-type="image-md-block"]') as HTMLElement | null;
+                const img = block?.querySelector(".vditor-wysiwyg__image-md__preview img") as HTMLImageElement | null;
+                if (img) {
+                    // Keep this button deterministic: always open built-in fullscreen overlay.
+                    // This avoids downstream config/CSS differences breaking the entry.
+                    previewImage(img, vditor.options.lang, vditor.options.theme);
+                }
+                return;
+            }
+
             if (event.target.tagName === "INPUT") {
                 const checkElement = event.target as HTMLInputElement;
                 if (checkElement.checked) {
@@ -427,19 +501,13 @@ class WYSIWYG {
             if (event.target.tagName === "IMG") {
                 const previewElement = hasClosestByClassName(event.target, "vditor-wysiwyg__preview");
                 if (previewElement) {
-                    // 图片属于预览块时，优先展开源码编辑区
                     showCode(previewElement, vditor);
                     return;
                 }
-                // plantuml 图片渲染不进行提示
-                if (!event.target.parentElement.classList.contains("vditor-wysiwyg__preview")) {
-                    if (event.target.getAttribute("data-type") === "link-ref") {
-                        genLinkRefPopover(vditor, event.target);
-                    } else {
-                        genImagePopover(event, vditor);
-                    }
-                    return;
+                if (event.target.getAttribute("data-type") === "link-ref") {
+                    genLinkRefPopover(vditor, event.target);
                 }
+                return;
             }
 
             // 打开链接

@@ -37,6 +37,8 @@ window.VditorI18n = {
   'heading5': 'Heading 5',
   'heading6': 'Heading 6',
   'help': 'Help',
+  'imageBlockEditHint': 'Click the image to edit the Markdown line. Use the top-right button or double-click the image to preview.',
+  'imageBlockPreview': 'Preview image',
   'imageURL': 'image URL',
   'indent': 'Indent',
   'info': 'Info',

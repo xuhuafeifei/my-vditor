@@ -12,6 +12,7 @@ import {getSelectPosition, setRangeByWbr} from "../util/selection";
 import {renderToc} from "../util/toc";
 import {processAfterRender} from "./process";
 import {getMarkdown} from "../markdown/getMarkdown";
+import {injectEmptyMarkdownImagesAsHtml, patchEmptyImageSrcInHtml} from "../util/emptyImagePlaceholder";
 
 export const input = (vditor: IVditor, range: Range, ignoreSpace = false, event?: InputEvent) => {
     let blockElement = hasClosestBlock(range.startContainer);
@@ -178,8 +179,10 @@ export const input = (vditor: IVditor, range: Range, ignoreSpace = false, event?
     }
 
     log("SpinVditorIRDOM", html, "argument", vditor.options.debugger);
+    html = injectEmptyMarkdownImagesAsHtml(html);
     html = vditor.lute.SpinVditorIRDOM(html);
     log("SpinVditorIRDOM", html, "result", vditor.options.debugger);
+    html = patchEmptyImageSrcInHtml(html);
 
     if (isIRElement) {
         blockElement.innerHTML = html;
