@@ -30,6 +30,7 @@ import {
     setSelectionFocus,
 } from "../util/selection";
 import {afterRenderEvent} from "./afterRenderEvent";
+import {isEditableCodeBlock, refreshFencedCode} from "./fencedCodeEdit";
 import {removeBlockElement} from "./processKeydown";
 import {renderToc} from "../util/toc";
 import {getMarkdown} from "../markdown/getMarkdown";
@@ -610,7 +611,13 @@ export const highlightToolbarWYSIWYG = (vditor: IVditor) => {
         vditor.wysiwyg.element
             .querySelectorAll(".vditor-wysiwyg__preview")
             .forEach((itemElement) => {
+                // 原意图：光标离开一个"渲染型块"时，把该块的 pre 重新藏掉、只显 preview。
+                // 对我们接管的编程语言 code-block，pre>code 本身就是最终展示形态，不能藏 ——
+                // 所以这里遇到 data-vditor-code-edit=1 的块时跳过，这个判断是"光标离开后代码块消失"的关键修复。
                 if (!blockRenderElement || (blockRenderElement && isBlock && !blockRenderElement.contains(itemElement))) {
+                    if (isEditableCodeBlock(itemElement.parentElement)) {
+                        return;
+                    }
                     const previousElement = itemElement.previousElementSibling as HTMLElement;
                     previousElement.style.display = "none";
                 }
@@ -650,6 +657,7 @@ export const highlightToolbarWYSIWYG = (vditor: IVditor) => {
                             blockRenderElement.firstElementChild.innerHTML;
                         processCodeRender(blockRenderElement.lastElementChild as HTMLElement, vditor);
                     }
+                    refreshFencedCode(blockRenderElement as HTMLElement, vditor);
                     afterRenderEvent(vditor);
                     // 当鼠标点选语言时，触发自定义input事件
                     if (e.detail === 1) {

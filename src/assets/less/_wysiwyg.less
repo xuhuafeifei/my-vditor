@@ -66,6 +66,26 @@
     pre:last-child {
       margin-bottom: 1em;
     }
+
+    // 可编辑高亮代码块：pre>code 自身作为 hljs 渲染区，直接可输入
+    &[data-type="code-block"] > pre {
+      margin: 1em 0;
+
+      > code {
+        display: block;
+        padding: 0.5em 1em;
+        background-color: var(--textarea-background-color);
+        border-radius: 3px;
+        font-family: var(--code-font-family, Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace);
+        font-size: 85%;
+        line-height: 1.45;
+        tab-size: 4;
+        white-space: pre;
+        overflow-x: auto;
+        outline: none;
+        caret-color: var(--textarea-text-color);
+      }
+    }
   }
 
   &__preview {

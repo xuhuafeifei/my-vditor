@@ -13,6 +13,7 @@ import {
 } from "../util/emptyImagePlaceholder";
 import {decodeTableCellBrInHTML, encodeTableCellBrInHTML} from "../util/tableBr";
 import {afterRenderEvent} from "./afterRenderEvent";
+import {refreshFencedCodeIn} from "./fencedCodeEdit";
 import {unwrapImageMdBlocksForSpin, wrapStandaloneImageBlocksAfterSpin} from "./imageMdBlock";
 import {previoueIsEmptyA} from "./inlineTag";
 
@@ -54,6 +55,37 @@ export const input = (vditor: IVditor, range: Range, event?: InputEvent) => {
         // 在行首进行删除，后面的元素会带有样式，需清除
         blockElement.querySelectorAll("[style]").forEach((item) => {
             item.removeAttribute("style");
+        });
+
+        // === 可编辑高亮：送给 Lute 前，把 code-block 内 pre>code 的 hljs span 铲平为纯文本 ===
+        // 原因：下面会把 blockElement.innerHTML/outerHTML 交给 lute.SpinVditorDOM → VditorDOM2Md，
+        // 若 code 里留着 <span class="hljs-keyword">public</span> 这样的结构，Lute 会把它
+        // 当成 markdown 里的内联元素来序列化，输出的 md 就被污染了。
+        // 所以在 spin 前铲平，spin 后 refreshFencedCodeIn 会按新文本重新上色。
+        // wbr 是 Vditor 用来记光标位置的"标记元素"（void element），不能丢；用一个
+        // 文本占位符 WBR_MARK 先替换 wbr → 读出纯 textContent → 再按占位符切分、重建 wbr。
+        blockElement.querySelectorAll(`[data-type="code-block"] > pre > code`).forEach((code: HTMLElement) => {
+            if (!code.querySelector("span, br")) {
+                return;                                       // 没有高亮结构就没必要处理
+            }
+            const hasWbr = !!code.querySelector("wbr");
+            if (hasWbr) {
+                const WBR_MARK = "\u0001WBR\u0001";           // 用不可见控制字符，不会出现在用户源码里
+                const wbr = code.querySelector("wbr") as HTMLElement;
+                wbr.replaceWith(document.createTextNode(WBR_MARK));
+                const text = code.textContent || "";
+                code.textContent = "";                        // 清空所有子节点
+                const parts = text.split(WBR_MARK);
+                code.appendChild(document.createTextNode(parts[0] ?? ""));
+                code.appendChild(document.createElement("wbr"));
+                if (parts.length > 1) {
+                    // 理论上只会有两段，但若源码里真的出现了 WBR_MARK，拼回去也不丢字符
+                    code.appendChild(document.createTextNode(parts.slice(1).join(WBR_MARK)));
+                }
+            } else {
+                // 没有光标锚点，就最简单的一步：把所有子 DOM 塌成一个 Text 节点
+                code.textContent = code.textContent || "";
+            }
         });
 
         // 移除空评论
@@ -214,6 +246,8 @@ export const input = (vditor: IVditor, range: Range, event?: InputEvent) => {
             .forEach((item: HTMLElement) => {
                 processCodeRender(item, vditor);
             });
+        // spin 之后 DOM 已重建，code 里是纯文本 → 再跑一次可编辑高亮路径，重新上色
+        refreshFencedCodeIn(vditor.wysiwyg.element, vditor);
 
         if (event && (event.inputType === "deleteContentBackward" || event.inputType === "deleteContentForward") &&
             vditor.options.comment.enable) {

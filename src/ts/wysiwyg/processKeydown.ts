@@ -77,8 +77,11 @@ export const processKeydown = (vditor: IVditor, event: KeyboardEvent) => {
     // code render
     const codeRenderElement = hasClosestByClassName(startContainer, "vditor-wysiwyg__block");
     if (codeRenderElement) {
-        // esc: 退出编辑，仅展示渲染
-        if (event.key === "Escape" && codeRenderElement.children.length === 2) {
+        // Esc: 对渲染型块（mermaid 等），原意是"退出编辑、只看渲染结果"，所以把 pre 藏掉。
+        // 对可编辑高亮代码块我们并没有独立的"渲染结果"，pre 本身就是最终形态，不能藏；
+        // 所以见到 data-vditor-code-edit=1 就跳过这条老分支。
+        if (event.key === "Escape" && codeRenderElement.children.length === 2
+            && codeRenderElement.getAttribute("data-vditor-code-edit") !== "1") {
             vditor.wysiwyg.popover.style.display = "none";
             (codeRenderElement.firstElementChild as HTMLElement).style.display = "none";
             vditor.wysiwyg.element.blur();

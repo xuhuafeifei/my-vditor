@@ -5,6 +5,7 @@ import {processAfterRender as processSVAfterRender, processPaste} from "../sv/pr
 import {uploadFiles} from "../upload/index";
 import {setHeaders} from "../upload/setHeaders";
 import {afterRenderEvent} from "../wysiwyg/afterRenderEvent";
+import {isEditableCodeBlock} from "../wysiwyg/fencedCodeEdit";
 import {input} from "../wysiwyg/input";
 import {isCtrl, isFirefox} from "./compatibility";
 import {scrollCenter} from "./editorCommonEvent";
@@ -292,7 +293,7 @@ export const listIndent = (vditor: IVditor, liElement: HTMLElement, range: Range
             tempTopListElement.querySelectorAll(`.vditor-${vditor.currentMode}__preview[data-render='2']`)
                 .forEach((item: HTMLElement) => {
                     processCodeRender(item, vditor);
-                    if (vditor.currentMode === "wysiwyg") {
+                    if (vditor.currentMode === "wysiwyg" && !isEditableCodeBlock(item.parentElement)) {
                         item.previousElementSibling.setAttribute("style", "display:none");
                     }
                 });
@@ -361,7 +362,7 @@ export const listOutdent = (vditor: IVditor, liElement: HTMLElement, range: Rang
             tempTopListElement.querySelectorAll(`.vditor-${vditor.currentMode}__preview[data-render='2']`)
                 .forEach((item: HTMLElement) => {
                     processCodeRender(item, vditor);
-                    if (vditor.currentMode === "wysiwyg") {
+                    if (vditor.currentMode === "wysiwyg" && !isEditableCodeBlock(item.parentElement)) {
                         item.previousElementSibling.setAttribute("style", "display:none");
                     }
                 });

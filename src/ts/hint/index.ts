@@ -6,6 +6,7 @@ import {execAfterRender} from "../util/fixBrowserBehavior";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {processCodeRender} from "../util/processCode";
 import {getCursorPosition, insertHTML, setSelectionFocus} from "../util/selection";
+import {refreshFencedCode} from "../wysiwyg/fencedCodeEdit";
 
 export class Hint {
     public timeId: number;
@@ -193,6 +194,9 @@ ${i === 0 ? "class='vditor-hint--current'" : ""}> ${html}</button>`;
             if (preElement && preElement.lastElementChild.classList.contains("vditor-wysiwyg__preview")) {
                 preElement.lastElementChild.innerHTML = preElement.firstElementChild.innerHTML;
                 processCodeRender(preElement.lastElementChild as HTMLElement, vditor);
+            }
+            if (preElement && preElement.getAttribute("data-type") === "code-block") {
+                refreshFencedCode(preElement as HTMLElement, vditor);
             }
         } else if (vditor.currentMode === "ir") {
             const preElement = hasClosestByClassName(range.startContainer, "vditor-ir__marker--pre");
