@@ -94,7 +94,7 @@ export const processCodeRender = (previewPanel: HTMLElement, vditor: IVditor) =>
  * 这张清单需要与本文件上方 processCodeRender 的 if-else 分支保持同步。
  */
 const NON_CODE_RENDER_LANGUAGES = new Set([
-    "abc", "plantuml", "mermaid", "flowchart",
+    "plantuml", "mermaid",
     "math", "markmap", "smiles",
 ]);
 

@@ -7,9 +7,8 @@ export const codeRender = (element: HTMLElement, option?: IHljs) => {
             e.parentElement.classList.contains("vditor-ir__marker--pre")) {
             return false;
         }
-        if (e.classList.contains("language-mermaid") || e.classList.contains("language-flowchart") ||
+        if (e.classList.contains("language-mermaid") ||
             e.classList.contains("language-plantuml") || e.classList.contains("language-markmap") ||
-            e.classList.contains("language-abc") ||
             e.classList.contains("language-math") || e.classList.contains("language-smiles")) {
             return false;
         }

@@ -12,7 +12,7 @@ import {isIslandCodeBlockLanguage, normalizeCodeLang} from "../util/processCode"
  * 编辑时看不到颜色。
  *
  * 本模块把编程语言的代码块（java/json/python…）改造成「pre>code 自身就是 hljs 渲染区」，
- * 并保持 contenteditable 可编辑。mermaid/math/flowchart 等非代码的渲染语言不受影响，继续
+ * 并保持 contenteditable 可编辑。mermaid/math 等非代码的渲染语言不受影响，继续
  * 走原有 processCodeRender + preview 的经典路径。
  *
  * 数据流

@@ -71,8 +71,6 @@ export const exportHTML = (vditor: IVditor) => {
     Vditor.mermaidRender(previewElement, '${vditor.options.cdn}', '${vditor.options.theme}');
     Vditor.SMILESRender(previewElement, '${vditor.options.cdn}', '${vditor.options.theme}');
     Vditor.markmapRender(previewElement, '${vditor.options.cdn}');
-    Vditor.flowchartRender(previewElement, '${vditor.options.cdn}');
-    Vditor.abcRender(previewElement, '${vditor.options.cdn}');
     ${vditor.options.preview.render.media.enable ? 'Vditor.mediaRender(previewElement);' : ""}
     Vditor.speechRender(previewElement);
 </script>

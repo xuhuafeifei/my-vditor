@@ -33,9 +33,8 @@ export const highlightRender = (hljsOption?: IHljs, element: HTMLElement | Docum
                     return;
                 }
 
-                if (block.classList.contains("language-mermaid") || block.classList.contains("language-flowchart") ||
+                if (block.classList.contains("language-mermaid") ||
                     block.classList.contains("language-plantuml")|| block.classList.contains("language-smiles") ||
-                    block.classList.contains("language-abc") ||
                     block.classList.contains("language-math")) {
                     return;
                 }
