@@ -12,6 +12,7 @@ import {getSelectPosition, setRangeByWbr} from "../util/selection";
 import {renderToc} from "../util/toc";
 import {processAfterRender} from "./process";
 import {getMarkdown} from "../markdown/getMarkdown";
+import {refreshIRFencedCodeIn} from "./fencedCodeEdit";
 import {injectEmptyMarkdownImagesAsHtml, patchEmptyImageSrcInHtml} from "../util/emptyImagePlaceholder";
 
 export const input = (vditor: IVditor, range: Range, ignoreSpace = false, event?: InputEvent) => {
@@ -178,6 +179,32 @@ export const input = (vditor: IVditor, range: Range, ignoreSpace = false, event?
         html = blockElement.innerHTML;
     }
 
+    // IR 代码块可编辑高亮会把 code 内部改成 hljs span，送给 Lute 前先还原为纯文本。
+    const tempElement = document.createElement("div");
+    tempElement.innerHTML = html;
+    tempElement.querySelectorAll(".vditor-ir__marker--pre > code").forEach((code: HTMLElement) => {
+        if (!code.querySelector("span, br")) {
+            return;
+        }
+        const hasWbr = !!code.querySelector("wbr");
+        if (hasWbr) {
+            const WBR_MARK = "\u0001WBR\u0001";
+            const wbr = code.querySelector("wbr") as HTMLElement;
+            wbr.replaceWith(document.createTextNode(WBR_MARK));
+            const text = code.textContent || "";
+            code.textContent = "";
+            const parts = text.split(WBR_MARK);
+            code.appendChild(document.createTextNode(parts[0] ?? ""));
+            code.appendChild(document.createElement("wbr"));
+            if (parts.length > 1) {
+                code.appendChild(document.createTextNode(parts.slice(1).join(WBR_MARK)));
+            }
+        } else {
+            code.textContent = code.textContent || "";
+        }
+    });
+    html = tempElement.innerHTML;
+
     log("SpinVditorIRDOM", html, "argument", vditor.options.debugger);
     html = injectEmptyMarkdownImagesAsHtml(html);
     html = vditor.lute.SpinVditorIRDOM(html);
@@ -244,6 +271,7 @@ export const input = (vditor: IVditor, range: Range, ignoreSpace = false, event?
     vditor.ir.element.querySelectorAll(".vditor-ir__preview[data-render='2']").forEach((item: HTMLElement) => {
         processCodeRender(item, vditor);
     });
+    refreshIRFencedCodeIn(vditor.ir.element, vditor);
 
     renderToc(vditor);
 

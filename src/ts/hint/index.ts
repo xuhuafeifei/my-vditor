@@ -7,6 +7,7 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {processCodeRender} from "../util/processCode";
 import {getCursorPosition, insertHTML, setSelectionFocus} from "../util/selection";
 import {refreshFencedCode} from "../wysiwyg/fencedCodeEdit";
+import {refreshIRFencedCodeIn} from "../ir/fencedCodeEdit";
 
 export class Hint {
     public timeId: number;
@@ -203,6 +204,7 @@ ${i === 0 ? "class='vditor-hint--current'" : ""}> ${html}</button>`;
             if (preElement && preElement.nextElementSibling.classList.contains("vditor-ir__preview")) {
                 preElement.nextElementSibling.innerHTML = preElement.innerHTML;
                 processCodeRender(preElement.nextElementSibling as HTMLElement, vditor);
+                refreshIRFencedCodeIn(preElement.parentElement, vditor);
             }
         }
         execAfterRender(vditor);
