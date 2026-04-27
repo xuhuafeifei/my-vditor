@@ -4,16 +4,13 @@ import {addScript} from "../util/addScript";
 import {hasClosestByClassName, hasClosestByMatchTag} from "../util/hasClosest";
 import {merge} from "../util/merge";
 import {anchorRender} from "./anchorRender";
-import {chartRender} from "./chartRender";
 import {codeRender} from "./codeRender";
-import {graphvizRender} from "./graphvizRender";
 import {highlightRender} from "./highlightRender";
 import {lazyLoadImageRender} from "./lazyLoadImageRender";
 import {mathRender} from "./mathRender";
 import {mediaRender} from "./mediaRender";
 import {mermaidRender} from "./mermaidRender";
 import {markmapRender} from "./markmapRender";
-import {mindmapRender} from "./mindmapRender";
 import {plantumlRender} from "./plantumlRender";
 import {setLute} from "./setLute";
 import {speechRender} from "./speechRender";
@@ -132,9 +129,6 @@ export const previewRender = async (previewElement: HTMLDivElement, markdown: st
     });
     mermaidRender(previewElement, mergedOptions.cdn, mergedOptions.mode);
     markmapRender(previewElement, mergedOptions.cdn);
-    graphvizRender(previewElement, mergedOptions.cdn);
-    chartRender(previewElement, mergedOptions.cdn, mergedOptions.mode);
-    mindmapRender(previewElement, mergedOptions.cdn, mergedOptions.mode);
     plantumlRender(previewElement, mergedOptions.cdn);
     if (mergedOptions.render.media.enable) {
         mediaRender(previewElement);

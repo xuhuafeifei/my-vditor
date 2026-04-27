@@ -44,7 +44,7 @@ export abstract class Constants {
         "stackoverflow-light", "tokyo-night-light", "vs", "xcode", "default"];
     public static readonly ALIAS_CODE_LANGUAGES: string[] = [
         // 自定义
-        "plantuml", "mermaid", "echarts", "mindmap", "graphviz", "math", "markmap",
+        "plantuml", "mermaid", "math", "markmap",
         // 别名
         "js", "ts", "html", "toml", "c#", "bat"
     ];

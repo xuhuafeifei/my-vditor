@@ -1,11 +1,8 @@
-import {chartRender} from "../markdown/chartRender";
 import {codeRender} from "../markdown/codeRender";
-import {graphvizRender} from "../markdown/graphvizRender";
 import {highlightRender} from "../markdown/highlightRender";
 import {mathRender} from "../markdown/mathRender";
 import {mermaidRender} from "../markdown/mermaidRender";
 import {markmapRender} from "../markdown/markmapRender";
-import {mindmapRender} from "../markdown/mindmapRender";
 import {plantumlRender} from "../markdown/plantumlRender";
 
 export const processPasteCode = (html: string, text: string, type = "sv") => {
@@ -70,14 +67,8 @@ export const processCodeRender = (previewPanel: HTMLElement, vditor: IVditor) =>
         mermaidRender(previewPanel, vditor.options.cdn, vditor.options.theme);
     } else if (language === "markmap") {
         markmapRender(previewPanel, vditor.options.cdn);
-    } else if (language === "echarts") {
-        chartRender(previewPanel, vditor.options.cdn, vditor.options.theme);
-    } else if (language === "mindmap") {
-        mindmapRender(previewPanel, vditor.options.cdn, vditor.options.theme);
     } else if (language === "plantuml") {
         plantumlRender(previewPanel, vditor.options.cdn);
-    } else if (language === "graphviz") {
-        graphvizRender(previewPanel, vditor.options.cdn);
     } else if (language === "math") {
         mathRender(previewPanel, {cdn: vditor.options.cdn, math: vditor.options.preview.math});
     } else {
@@ -98,13 +89,13 @@ export const processCodeRender = (previewPanel: HTMLElement, vditor: IVditor) =>
 
 /**
  * 「非代码」渲染语言集合：这些语言不是给人读的源码，而是被专门的 render 函数
- * （mermaid、echarts、math 等）转成图像/公式/图表，因此不应该走可编辑高亮路径，
+ * （mermaid、math 等）转成图像/公式/图表，因此不应该走可编辑高亮路径，
  * 必须保留 Vditor 原有的「藏 pre、显 preview」切换。
  * 这张清单需要与本文件上方 processCodeRender 的 if-else 分支保持同步。
  */
 const NON_CODE_RENDER_LANGUAGES = new Set([
-    "abc", "plantuml", "mermaid", "flowchart", "echarts", "mindmap",
-    "graphviz", "math", "markmap", "smiles",
+    "abc", "plantuml", "mermaid", "flowchart",
+    "math", "markmap", "smiles",
 ]);
 
 /**

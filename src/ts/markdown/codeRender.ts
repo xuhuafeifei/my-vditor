@@ -8,9 +8,8 @@ export const codeRender = (element: HTMLElement, option?: IHljs) => {
             return false;
         }
         if (e.classList.contains("language-mermaid") || e.classList.contains("language-flowchart") ||
-            e.classList.contains("language-echarts") || e.classList.contains("language-mindmap") ||
             e.classList.contains("language-plantuml") || e.classList.contains("language-markmap") ||
-            e.classList.contains("language-abc") || e.classList.contains("language-graphviz") ||
+            e.classList.contains("language-abc") ||
             e.classList.contains("language-math") || e.classList.contains("language-smiles")) {
             return false;
         }

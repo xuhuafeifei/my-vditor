@@ -1,13 +1,10 @@
-import {chartRender} from "../markdown/chartRender";
 import {codeRender} from "../markdown/codeRender";
 import {getMarkdown} from "../markdown/getMarkdown";
-import {graphvizRender} from "../markdown/graphvizRender";
 import {highlightRender} from "../markdown/highlightRender";
 import {mathRender} from "../markdown/mathRender";
 import {mediaRender} from "../markdown/mediaRender";
 import {mermaidRender} from "../markdown/mermaidRender";
 import {markmapRender} from "../markdown/markmapRender";
-import {mindmapRender} from "../markdown/mindmapRender";
 import {plantumlRender} from "../markdown/plantumlRender";
 import {getEventName} from "../util/compatibility";
 import {hasClosestByClassName, hasClosestByMatchTag} from "../util/hasClosest";
@@ -223,9 +220,6 @@ export class Preview {
             vditor.options.cdn);
         mermaidRender(vditor.preview.previewElement, vditor.options.cdn, vditor.options.theme);
         markmapRender(vditor.preview.previewElement, vditor.options.cdn);
-        graphvizRender(vditor.preview.previewElement, vditor.options.cdn);
-        chartRender(vditor.preview.previewElement, vditor.options.cdn, vditor.options.theme);
-        mindmapRender(vditor.preview.previewElement, vditor.options.cdn, vditor.options.theme);
         plantumlRender(vditor.preview.previewElement, vditor.options.cdn);
         if (vditor.options.preview.render.media.enable) {
             mediaRender(vditor.preview.previewElement);

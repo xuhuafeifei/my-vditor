@@ -25,8 +25,5 @@ export const showCode = (previewElement: HTMLElement, vditor: IVditor, first = t
         range.collapse(false);
     }
     setSelectionFocus(range);
-    if (previewElement.firstElementChild.classList.contains("language-mindmap")) {
-        return;
-    }
     scrollCenter(vditor);
 };

@@ -1,14 +1,11 @@
 import * as adapterRender from "./ts/markdown/adapterRender";
-import {chartRender} from "./ts/markdown/chartRender";
 import {codeRender} from "./ts/markdown/codeRender";
-import {graphvizRender} from "./ts/markdown/graphvizRender";
 import {highlightRender} from "./ts/markdown/highlightRender";
 import {lazyLoadImageRender} from "./ts/markdown/lazyLoadImageRender";
 import {mathRender} from "./ts/markdown/mathRender";
 import {mediaRender} from "./ts/markdown/mediaRender";
 import {mermaidRender} from "./ts/markdown/mermaidRender";
 import {markmapRender} from "./ts/markdown/markmapRender";
-import {mindmapRender} from "./ts/markdown/mindmapRender";
 import {outlineRender} from "./ts/markdown/outlineRender";
 import {plantumlRender} from "./ts/markdown/plantumlRender";
 import {md2html, previewRender} from "./ts/markdown/previewRender";
@@ -25,8 +22,6 @@ class Vditor {
     public static previewImage = previewImage;
     /** 为 element 中的代码块添加复制按钮 */
     public static codeRender = codeRender;
-    /** 对 graphviz 进行渲染 */
-    public static graphvizRender = graphvizRender;
     /** 为 element 中的代码块进行高亮渲染 */
     public static highlightRender = highlightRender;
     /** 对数学公式进行渲染 */
@@ -35,10 +30,6 @@ class Vditor {
     public static mermaidRender = mermaidRender;
     /** 支持 markdown 的思维导图 */
     public static markmapRender = markmapRender;
-    /** 图表渲染 */
-    public static chartRender = chartRender;
-    /** 脑图渲染 */
-    public static mindmapRender = mindmapRender;
     /** plantuml渲染 */
     public static plantumlRender = plantumlRender;
     /** 大纲渲染 */
