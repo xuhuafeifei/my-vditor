@@ -3,11 +3,9 @@ import {setContentTheme} from "../ui/setContentTheme";
 import {addScript} from "../util/addScript";
 import {hasClosestByClassName, hasClosestByMatchTag} from "../util/hasClosest";
 import {merge} from "../util/merge";
-import {abcRender} from "./abcRender";
 import {anchorRender} from "./anchorRender";
 import {chartRender} from "./chartRender";
 import {codeRender} from "./codeRender";
-import {flowchartRender} from "./flowchartRender";
 import {graphvizRender} from "./graphvizRender";
 import {highlightRender} from "./highlightRender";
 import {lazyLoadImageRender} from "./lazyLoadImageRender";
@@ -15,7 +13,6 @@ import {mathRender} from "./mathRender";
 import {mediaRender} from "./mediaRender";
 import {mermaidRender} from "./mermaidRender";
 import {markmapRender} from "./markmapRender";
-import {SMILESRender} from "./SMILESRender";
 import {mindmapRender} from "./mindmapRender";
 import {plantumlRender} from "./plantumlRender";
 import {setLute} from "./setLute";
@@ -134,14 +131,11 @@ export const previewRender = async (previewElement: HTMLDivElement, markdown: st
         math: mergedOptions.math,
     });
     mermaidRender(previewElement, mergedOptions.cdn, mergedOptions.mode);
-    SMILESRender(previewElement, mergedOptions.cdn, mergedOptions.mode);
     markmapRender(previewElement, mergedOptions.cdn);
-    flowchartRender(previewElement, mergedOptions.cdn);
     graphvizRender(previewElement, mergedOptions.cdn);
     chartRender(previewElement, mergedOptions.cdn, mergedOptions.mode);
     mindmapRender(previewElement, mergedOptions.cdn, mergedOptions.mode);
     plantumlRender(previewElement, mergedOptions.cdn);
-    abcRender(previewElement, mergedOptions.cdn);
     if (mergedOptions.render.media.enable) {
         mediaRender(previewElement);
     }

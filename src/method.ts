@@ -1,15 +1,12 @@
-import {abcRender} from "./ts/markdown/abcRender";
 import * as adapterRender from "./ts/markdown/adapterRender";
 import {chartRender} from "./ts/markdown/chartRender";
 import {codeRender} from "./ts/markdown/codeRender";
-import {flowchartRender} from "./ts/markdown/flowchartRender";
 import {graphvizRender} from "./ts/markdown/graphvizRender";
 import {highlightRender} from "./ts/markdown/highlightRender";
 import {lazyLoadImageRender} from "./ts/markdown/lazyLoadImageRender";
 import {mathRender} from "./ts/markdown/mathRender";
 import {mediaRender} from "./ts/markdown/mediaRender";
 import {mermaidRender} from "./ts/markdown/mermaidRender";
-import {SMILESRender} from "./ts/markdown/SMILESRender";
 import {markmapRender} from "./ts/markdown/markmapRender";
 import {mindmapRender} from "./ts/markdown/mindmapRender";
 import {outlineRender} from "./ts/markdown/outlineRender";
@@ -36,16 +33,10 @@ class Vditor {
     public static mathRender = mathRender;
     /** 流程图/时序图/甘特图渲染 */
     public static mermaidRender = mermaidRender;
-    /** 化学物质结构渲染 */
-    public static SMILESRender = SMILESRender;
     /** 支持 markdown 的思维导图 */
     public static markmapRender = markmapRender;
-    /** flowchart.js 渲染 */
-    public static flowchartRender = flowchartRender;
     /** 图表渲染 */
     public static chartRender = chartRender;
-    /** 五线谱渲染 */
-    public static abcRender = abcRender;
     /** 脑图渲染 */
     public static mindmapRender = mindmapRender;
     /** plantuml渲染 */

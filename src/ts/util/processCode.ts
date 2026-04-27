@@ -1,7 +1,5 @@
-import {abcRender} from "../markdown/abcRender";
 import {chartRender} from "../markdown/chartRender";
 import {codeRender} from "../markdown/codeRender";
-import {flowchartRender} from "../markdown/flowchartRender";
 import {graphvizRender} from "../markdown/graphvizRender";
 import {highlightRender} from "../markdown/highlightRender";
 import {mathRender} from "../markdown/mathRender";
@@ -9,7 +7,6 @@ import {mermaidRender} from "../markdown/mermaidRender";
 import {markmapRender} from "../markdown/markmapRender";
 import {mindmapRender} from "../markdown/mindmapRender";
 import {plantumlRender} from "../markdown/plantumlRender";
-import {SMILESRender} from "../markdown/SMILESRender";
 
 export const processPasteCode = (html: string, text: string, type = "sv") => {
     const tempElement = document.createElement("div");
@@ -69,16 +66,10 @@ export const processCodeRender = (previewPanel: HTMLElement, vditor: IVditor) =>
         return;
     }
     const language = previewPanel.firstElementChild.className.replace("language-", "");
-    if (language === "abc") {
-        abcRender(previewPanel, vditor.options.cdn);
-    } else if (language === "mermaid") {
+    if (language === "mermaid") {
         mermaidRender(previewPanel, vditor.options.cdn, vditor.options.theme);
-    } else if (language === "smiles") {
-        SMILESRender(previewPanel, vditor.options.cdn, vditor.options.theme);
     } else if (language === "markmap") {
         markmapRender(previewPanel, vditor.options.cdn);
-    } else if (language === "flowchart") {
-        flowchartRender(previewPanel, vditor.options.cdn);
     } else if (language === "echarts") {
         chartRender(previewPanel, vditor.options.cdn, vditor.options.theme);
     } else if (language === "mindmap") {
